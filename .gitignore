@@ -16,3 +16,6 @@
 
 # Log
 *.log
+
+# img
+*.jpeg
