@@ -25,16 +25,21 @@ import (
 
 // 其中 3, 4步骤还在访问, 不确定票在哪个响应里
 
+// 58pic 的微信登录页
 var AppID58pic = "https://open.weixin.qq.com/connect/qrconnect?appid=wx47e0850600dd30fc&redirect_uri=https%3A%2F%2Fwww.58pic.com%2Findex.php%3Fm%3Dlogin%26a%3Dcallback%26type%3Dweixin&response_type=code&scope=snsapi_login"
+
+// 二维码链接前缀
 var QrcodeURLPref = "https://open.weixin.qq.com"
 
+// 未扫码时, 浏览器一直在轮询的链接
 // https://lp.open.weixin.qq.com/connect/l/qrconnect?uuid=011KWtIYwdjR0lRi&_=1572590279242
 var LoopURLNotScan = "https://lp.open.weixin.qq.com/connect/l/qrconnect?uuid=%s&_=%d"
 
 // https://lp.open.weixin.qq.com/connect/l/qrconnect?uuid=001hjUNi2kHhBwC4&last=404&_=1572593319534
-// todo: 404 可能需要动态获取
+// 相比 LoopURLNotScan, 此变量多出 last 字段, 经过测试, 该链接可以不访问
 var LoopURLScan = "https://lp.open.weixin.qq.com/connect/l/qrconnect?uuid=%s&last=404&_=%d"
 
+// 该链接访问后可获取登录 cookies
 // https://www.58pic.com/index.php?m=login&a=callback&type=weixin&code=061ia8Fp12swNi0jJqFp1Ol5Fp1ia8Fh&state=
 var CallBackURLL = "https://www.58pic.com/index.php?m=login&a=callback&type=weixin&code=%s&state="
 
