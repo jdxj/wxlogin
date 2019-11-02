@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"testing"
+	"time"
 )
 
 func TestURLEncode(t *testing.T) {
@@ -15,7 +16,7 @@ func TestURLEncode(t *testing.T) {
 
 	fmt.Println(res)
 
-	res, err = url.QueryUnescape("https://www.58pic.com/index.php?m=login&a=callback&type=weixin")
+	res, err = url.QueryUnescape("https%3A%2F%2Fwww.58pic.com%2Findex.php%3Fm%3Dlogin%26a%3Dcallback%26type%3Dweixin")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -34,12 +35,42 @@ func TestAppPage_String(t *testing.T) {
 		panic(err)
 	}
 
-	if decode.String() == notDecode.String() {
+	if decode.AppPageURL() == notDecode.AppPageURL() {
 		fmt.Println("equal")
 	}
 }
 
-func TestPoller_String(t *testing.T) {
-	poller := NewPolling("123")
-	fmt.Println(poller)
+func TestAppPage_CallbackURL(t *testing.T) {
+	appPage, err := NewAppPage("123", "https%3A%2F%2Fwww.58pic.com%2Findex.php%3Fm%3Dlogin%26a%3Dcallback%26type%3Dweixin")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	callbackURL, err := appPage.CallbackURL("456")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("callbackURL:", callbackURL)
+}
+
+//func TestPoller_String(t *testing.T) {
+//	poller := NewPolling("123")
+//	fmt.Println(poller)
+//}
+
+func TestReadClosedChan(t *testing.T) {
+	msg := make(chan string)
+	go func() {
+		msg <- "123"
+		close(msg)
+	}()
+
+	time.Sleep(2 * time.Second)
+	if val, ok := <-msg; ok {
+		fmt.Println(val)
+	} else {
+		fmt.Println("read val fail")
+	}
 }
