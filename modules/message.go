@@ -3,10 +3,16 @@ package modules
 import (
 	"fmt"
 	"net/url"
+	"wxlogin/utils/time"
 )
 
 const (
+	// 微信二维码页链接
 	AppPageFormat = "https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=%s&scope=%s"
+	// 二维码链接前缀
+	QrcodeURLPref = "https://open.weixin.qq.com"
+	// 轮询链接
+	PollingFormat = "https://lp.open.weixin.qq.com/connect/l/qrconnect?uuid=%s&_=%d"
 )
 
 // NewAppPage 用于创建微信二维页的 url.
@@ -38,7 +44,21 @@ type AppPage struct {
 	state        string // 不是必须的, 暂时固定为空串 ""
 }
 
-// todo: 实现
 func (ap *AppPage) String() string {
 	return fmt.Sprintf(AppPageFormat, ap.appID, ap.redirectURL, ap.responseType, ap.scope)
+}
+
+func NewPolling(uuid string) *Poller {
+	poller := &Poller{
+		uuid: uuid,
+	}
+	return poller
+}
+
+type Poller struct {
+	uuid string
+}
+
+func (pol *Poller) String() string {
+	return fmt.Sprintf(PollingFormat, pol.uuid, time.NowUnixMilli())
 }

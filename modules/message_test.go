@@ -38,3 +38,8 @@ func TestAppPage_String(t *testing.T) {
 		fmt.Println("equal")
 	}
 }
+
+func TestPoller_String(t *testing.T) {
+	poller := NewPolling("123")
+	fmt.Println(poller)
+}
