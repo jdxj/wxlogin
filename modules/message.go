@@ -1,10 +1,24 @@
 package modules
 
-const (
-	AppURLFormat = "https://open.weixin.qq.com/connect/qrconnect?appid=wx47e0850600dd30fc&redirect_uri=https%3A%2F%2Fwww.58pic.com%2Findex.php%3Fm%3Dlogin%26a%3Dcallback%26type%3Dweixin&response_type=code&scope=snsapi_login"
+import (
+	"fmt"
+	"net/url"
 )
 
-func NewAppPage(appID, redURL string) *AppPage {
+const (
+	AppPageFormat = "https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=%s&scope=%s"
+)
+
+// NewAppPage 用于创建微信二维页的 url.
+// 扫码成功后所要重定向的 url 已做查询编码,
+// redURL 参数传入编码或未编码的都可.
+func NewAppPage(appID, redURL string) (*AppPage, error) {
+	decode, err := url.QueryUnescape(redURL)
+	if err != nil {
+		return nil, err
+	}
+	redURL = url.QueryEscape(decode)
+
 	ap := &AppPage{
 		appID:        appID,
 		redirectURL:  redURL,
@@ -12,7 +26,7 @@ func NewAppPage(appID, redURL string) *AppPage {
 		scope:        "snsapi_login",
 		state:        "",
 	}
-	return ap
+	return ap, nil
 }
 
 // AppPage 用于描述某个第三方网站在使用微信扫码登录时的跳转连接
@@ -26,5 +40,5 @@ type AppPage struct {
 
 // todo: 实现
 func (ap *AppPage) String() string {
-	return ""
+	return fmt.Sprintf(AppPageFormat, ap.appID, ap.redirectURL, ap.responseType, ap.scope)
 }
