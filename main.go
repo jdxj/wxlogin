@@ -14,10 +14,19 @@ func main() {
 		return
 	}
 
-	uuid, err := appPage.VisitAppPage()
+	err = appPage.VisitAppPage()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("uuid:", uuid)
+
+	cookies, err := appPage.Callback()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, cookie := range cookies {
+		fmt.Println(cookie)
+	}
 }

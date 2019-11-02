@@ -71,6 +71,26 @@ func (ap *AppPage) CallbackURL(code string) (string, error) {
 	return fmt.Sprintf("%s&code=%s&state=", urlPref, code), nil
 }
 
+func (ap *AppPage) Callback() ([]*http.Cookie, error) {
+	codeChan := ap.Poll()
+	code, ok := <-codeChan
+	if !ok {
+		return nil, fmt.Errorf("can not get code")
+	}
+
+	cbURL, err := ap.CallbackURL(code)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Get(cbURL)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Cookies(), nil
+}
+
 // VisitAppPage 用于访问微信二维码页,
 // 其返回值为二维码 id (也用作之后的 uuid),
 // 同时保存该二维码
@@ -105,6 +125,8 @@ func (ap *AppPage) VisitAppPage() error {
 	return nil
 }
 
+// PollingURL 用于返回轮询的链接,
+// 注意: 由于有时间戳参数, 所以使用时需要再次调用.
 func (ap *AppPage) PollingURL() string {
 	return fmt.Sprintf(PollingFormat, ap.uuid, myTime.NowUnixMilli())
 }
@@ -114,30 +136,44 @@ func (ap *AppPage) Poll() <-chan string {
 	deadline := time.NewTimer(5 * time.Minute)
 
 	go func() {
+		defer close(code)
+
 		for {
-			se
+			select {
+			case <-deadline.C:
+				return
+			default:
+			}
+
+			// todo: 可能需要手动 sleep
 			pollingURL := ap.PollingURL()
-			http.Get(pollingURL)
+			resp, err := http.Get(pollingURL)
+			if err != nil {
+				// todo: 此处需要打印日志
+				fmt.Println(err)
+				// todo: 是否需要重试?
+				continue
+			}
+
+			data, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				// todo: 此处需要打印日志
+				fmt.Println(err)
+				resp.Body.Close()
+				return
+			}
+			resp.Body.Close()
+
+			infos := parseScanResp(string(data))
+			if infos[0] == "405" {
+				code <- infos[1]
+				return
+			}
 		}
 	}()
 
 	return code
 }
-
-//func NewPolling(uuid string) *Poller {
-//	poller := &Poller{
-//		uuid: uuid,
-//	}
-//	return poller
-//}
-//
-//type Poller struct {
-//	uuid string
-//}
-//
-//func (pol *Poller) String() string {
-//	return fmt.Sprintf(PollingFormat, pol.uuid, time.NowUnixMilli())
-//}
 
 func downloadQrcode(url string) error {
 	req, err := http.NewRequest("GET", url, nil)
