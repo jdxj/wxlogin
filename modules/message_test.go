@@ -2,6 +2,7 @@ package modules
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"testing"
 	"time"
@@ -73,4 +74,8 @@ func TestReadClosedChan(t *testing.T) {
 	} else {
 		fmt.Println("read val fail")
 	}
+}
+
+func TestSaveCookies(t *testing.T) {
+	http.Response{}.Cookies()
 }
